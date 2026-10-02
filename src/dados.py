@@ -15,7 +15,9 @@ import pandas as pd
 
 from estilo import CRS_BH, CRS_WEB
 
-PASTA_DADOS = os.environ.get("PASTA_DADOS", "dados_baixados")
+PASTA_DADOS = os.environ.get("PASTA_DADOS", "dados_baixados")   # downloads grandes (IBGE)
+# pasta dados/ do repositório, encontrada a partir deste arquivo (funciona no Colab, no Drive e no PC)
+DADOS_REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dados"))
 COD_BH = "3106200"
 
 URL_SETORES_MG = ("https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/"
@@ -96,8 +98,7 @@ def setores_bh(cod_mun=COD_BH):
 def metro_bh(caminho=None):
     """Estações da Linha 1 do metrô de BH (coordenadas aproximadas, ver README)."""
     if caminho is None:
-        aqui = os.path.dirname(os.path.abspath(__file__))
-        caminho = os.path.join(aqui, "..", "dados", "metro_bh_linha1.csv")
+        caminho = os.path.join(DADOS_REPO, "metro_bh_linha1.csv")
     df = pd.read_csv(caminho)
     return gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat),
                             crs=CRS_WEB).to_crs(CRS_BH)
@@ -117,5 +118,5 @@ def osm_feicoes(tags, lugar=None, ponto=None, raio=1500):
     return gdf.to_crs(CRS_BH)
 
 
-__all__ = ["COD_BH", "VARIAVEIS_SETOR", "populacao_municipios_sidra", "municipios_mg", "setores_bh",
+__all__ = ["DADOS_REPO", "COD_BH", "VARIAVEIS_SETOR", "populacao_municipios_sidra", "municipios_mg", "setores_bh",
            "metro_bh", "osm_feicoes"]
