@@ -8,10 +8,10 @@ Nada precisa ser instalado no computador: tudo roda no **Google Colab**, direto 
 
 | Notebook | Para quê | Abrir |
 |---|---|---|
-| `01_livecoding.ipynb` | Roteiro completo da oficina, rodado ao vivo | [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/brfelipealmeida/oficina-python-mapeamento/blob/main/notebooks/01_livecoding.ipynb) |
-| `02_pratico_grupo_A_cheios_vazios.ipynb` | Prático do Grupo A | [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/brfelipealmeida/oficina-python-mapeamento/blob/main/notebooks/02_pratico_grupo_A_cheios_vazios.ipynb) |
-| `02_pratico_grupo_B_areas_verdes.ipynb` | Prático do Grupo B | [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/brfelipealmeida/oficina-python-mapeamento/blob/main/notebooks/02_pratico_grupo_B_areas_verdes.ipynb) |
-| `02_pratico_grupo_C_favelas_equipamentos.ipynb` | Prático do Grupo C | [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/brfelipealmeida/oficina-python-mapeamento/blob/main/notebooks/02_pratico_grupo_C_favelas_equipamentos.ipynb) |
+| `01_livecoding.ipynb` | Roteiro completo, do Python básico à rede da RMBH, rodado ao vivo | [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/brfelipealmeida/oficina-python-mapeamento/blob/main/notebooks/01_livecoding.ipynb) |
+| `02_exercicios.ipynb` | Exercícios do fim da oficina: complete os `??` | [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/brfelipealmeida/oficina-python-mapeamento/blob/main/notebooks/02_exercicios.ipynb) |
+| `03_exercicios_gabarito.ipynb` | Gabarito dos exercícios | [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/brfelipealmeida/oficina-python-mapeamento/blob/main/notebooks/03_exercicios_gabarito.ipynb) |
+| `extras_para_casa/` | Três práticos mais longos (cheios e vazios, áreas verdes, favelas e equipamentos) | abra pelo GitHub |
 | `web/painel_rede_rmbh.html` | Painel interativo do sistema de transporte da RMBH como rede | baixe e abra no navegador |
 | `apresentacao/index.html` | Slides da oficina, interativos | abra no navegador; tecla P exporta PDF |
 
@@ -21,14 +21,17 @@ Nada precisa ser instalado no computador: tudo roda no **Google Colab**, direto 
 
 | Horário | Bloco |
 |---|---|
-| 0:00 – 0:35 | Complexidade urbana e trajetória: PELT-MG, mobilidade em Londres, Elizabeth Line |
-| 0:35 – 0:55 | Hipótese, validação de dados, correlação e regressão |
-| 0:55 – 1:15 | Dados geoespaciais: CRS, tipos de coluna, joins |
-| 1:15 – 1:25 | OpenStreetMap e grafos: conceitos |
-| 1:25 – 1:35 | Intervalo |
-| 1:35 – 2:35 | Live coding no Colab (`01_livecoding.ipynb`) |
-| 2:35 – 3:35 | Prático em grupos (`02_pratico_*.ipynb`) |
-| 3:35 – 4:00 | Apresentações (6 min por grupo) e fechamento |
+| 0:00 – 0:10 | Avisos e apresentações |
+| 0:10 – 0:40 | Complexidade urbana, planejamento e mobilidade |
+| 0:40 – 0:55 | Método quantitativo: hipótese, validação, correlação e regressão |
+| 0:55 – 1:20 | Dados geoespaciais e redes |
+| 1:20 – 1:35 | Python básico |
+| 1:35 – 1:45 | Intervalo |
+| 1:45 – 3:00 | Live coding (`01_livecoding.ipynb`) |
+| 3:00 – 3:30 | Exercícios (`02_exercicios.ipynb`) |
+| 3:30 – 4:00 | Dúvidas |
+
+**Antes da oficina:** ter uma conta Google (para o Colab e o Drive) e uma conta no GitHub.
 
 ## Estrutura
 
@@ -38,9 +41,9 @@ oficina-python-mapeamento/
 ├── requirements.txt          pacotes, para quem quiser rodar fora do Colab
 ├── notebooks/
 │   ├── 01_livecoding.ipynb
-│   ├── 02_pratico_grupo_A_cheios_vazios.ipynb
-│   ├── 02_pratico_grupo_B_areas_verdes.ipynb
-│   └── 02_pratico_grupo_C_favelas_equipamentos.ipynb
+│   ├── 02_exercicios.ipynb
+│   ├── 03_exercicios_gabarito.ipynb
+│   └── extras_para_casa/     três práticos mais longos, por tema
 ├── src/
 │   ├── estilo.py             cores, fontes, título, créditos, escala, norte
 │   ├── dados.py              download de IBGE (SIDRA e setores), geobr e OSM
@@ -113,22 +116,17 @@ Para mudar a identidade visual inteira (por exemplo, para a paleta de outro proj
 
 Para editar, mude `apresentacao/modelo.html` (slides novos) ou troque o PDF em `apresentacao/fonte/` e rode `python apresentacao/gerar_apresentacao.py` (requer `pip install pymupdf`).
 
-## Prático em grupos
+## Exercícios
 
-Três grupos de cinco pessoas, uma base por grupo. Cada grupo entrega:
+`02_exercicios.ipynb` tem três exercícios curtos. Em cada um, o dado já chega carregado e a pessoa completa os `??` para editar o DataFrame, fazer um mapa e um gráfico, todos com créditos. `03_exercicios_gabarito.ipynb` traz as respostas.
 
-1. uma pergunta e uma hipótese (H1 e H0);
-2. o dado limpo e validado;
-3. um método espacial (buffer, join espacial, distância, cluster ou grade);
-4. um método quantitativo (correlação, regressão ou comparação de grupos);
-5. um mapa e um gráfico com créditos;
-6. três frases de conclusão, incluindo um limite da análise.
-
-| Grupo | Tema | Dados |
+| Exercício | Tema | Dados |
 |---|---|---|
-| A | Cheios, vazios e uso do solo | OSM: edificações e uso do solo em recortes de BH |
-| B | Áreas verdes e densidade | Censo 2022 por setor + áreas verdes do OSM |
-| C | Favelas e comunidades urbanas e equipamentos | Censo 2022 (setores em FCU) + escolas e saúde do OSM |
+| 1 | Favelas e comunidades urbanas | setores do Censo 2022 de BH |
+| 2 | Áreas verdes e densidade | setores do Censo 2022 + parques do OSM |
+| 3 | Cheios e vazios | edificações do OSM num ponto escolhido |
+
+Para quem quiser ir além em casa, `notebooks/extras_para_casa/` tem três práticos mais longos, com hipótese, método espacial e método quantitativo.
 
 ## Para ir além
 

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Introdução ao Python para Mapeamento · Felipe Almeida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Jost:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --preto:#000000; --branco:#FFFFFF; --cinza:#6B6B6B; --cinza2:#9A9A9A; --cinza3:#C4C4C4; --linha:#E3E3E3; --fundo:#F5F5F5;
+  --indigo:#38307E; --lavanda:#B8A0E8; --ouro:#CFAE6E; --bordo:#621A15; --rosa:#B47C73; --aco:#AFC0D0;
+  --sans:"Open Sans",Arial,sans-serif; --espaco:Jost,"Century Gothic",Futura,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+body{font-family:var(--sans);color:var(--preto)}
+.palco{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;background:var(--branco);padding:118px 90px 110px;overflow:hidden}
+.slide.ativo{display:flex}
+.slide.img{padding:0;background:#000}
+.slide.img img{width:100%;height:100%;object-fit:contain;display:block}
+.slide:not(.img)::after{content:"FELIPE ALMEIDA";position:absolute;left:90px;bottom:42px;font-family:var(--espaco);font-weight:300;letter-spacing:.32em;font-size:15px;color:var(--cinza2)}
+.slide:not(.img)::before{content:attr(data-n);position:absolute;right:90px;bottom:42px;font-family:var(--espaco);font-weight:300;letter-spacing:.2em;font-size:15px;color:var(--cinza2)}
+.preto{background:var(--preto);color:var(--branco)}
+.preto::after,.preto::before{color:#7A7A7A!important}
+
+h2{font-weight:700;font-size:54px;line-height:1.1;margin:0 0 44px;letter-spacing:-.3px}
+h3{font-weight:700;font-size:30px;line-height:1.2;margin:0 0 12px}
+p,li,td,th{font-size:27px;line-height:1.45}
+p{margin:0 0 16px;max-width:60ch}
+.sub{color:var(--cinza)}
+.preto .sub{color:#BDBDBD}
+.peq{font-size:21px;color:var(--cinza)}
+.preto .peq{color:#A8A8A8}
+ul{margin:0;padding-left:30px}
+li{margin-bottom:10px}
+b,strong{font-weight:700}
+code{font-family:Consolas,"SFMono-Regular",monospace;font-size:.85em;background:#EFEAF9;padding:1px 6px;border-radius:4px}
+.mais{flex:1}
+
+/* tipografia espaçada, como os divisores do PDF */
+.espaco{font-family:var(--espaco);font-weight:300;letter-spacing:.3em;text-transform:uppercase}
+.divisor{justify-content:center;align-items:center}
+.divisor ol{list-style:none;margin:0;padding:0}
+.divisor li{font-family:var(--espaco);font-weight:300;letter-spacing:.3em;font-size:34px;line-height:1.55;text-transform:uppercase;margin:0}
+.divisor .titulo-sec{font-family:var(--espaco);font-weight:300;letter-spacing:.32em;font-size:40px;text-transform:uppercase;text-align:center;max-width:26ch;line-height:1.5}
+.afirma{font-weight:800;font-size:84px;line-height:1.08;max-width:17ch;margin:auto 0;letter-spacing:-1px}
+
+/* caso de estudo: metade preta, metade branca */
+.caso{flex-direction:row;padding:0}
+.caso .esq{width:36%;background:var(--preto);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:0 60px 110px}
+.caso .esq h2{color:#fff;font-size:60px;margin:0}
+.caso .dir{flex:1;display:flex;flex-direction:column;justify-content:center;padding:70px 80px 90px}
+.caso::after{color:#7A7A7A!important}
+
+.grade2{display:grid;grid-template-columns:1fr 1fr;gap:64px;flex:1;min-height:0}
+.grade3{display:grid;grid-template-columns:repeat(3,1fr);gap:44px}
+.grade4{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}
+
+/* pílulas e números, como no slide de metodologias */
+.passos{display:grid;gap:26px;align-items:start;margin-top:10px}
+.passo{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px}
+.passo .n{font-weight:800;font-size:58px;line-height:1}
+.pilula{border-radius:999px;padding:22px 26px;font-size:24px;line-height:1.25;background:var(--lavanda);color:var(--preto);width:100%;text-align:center}
+.pilula.ouro{background:var(--ouro)} .pilula.branca{background:#fff} .pilula.preta{background:#000;color:#fff;font-weight:700}
+.passo .leg{font-size:21px;color:var(--cinza);line-height:1.35}
+.preto .passo .leg{color:#BDBDBD}
+
+.circulos{display:flex;gap:28px;flex-wrap:wrap}
+.circ{width:250px;height:250px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:25px;line-height:1.25;padding:26px}
+
+table{border-collapse:collapse;width:100%}
+th{font-weight:700;font-size:26px;text-align:left;border-bottom:2px solid var(--preto);padding:10px 18px 10px 0}
+td{border-bottom:1px solid var(--linha);padding:12px 18px 12px 0;vertical-align:top;font-size:25px}
+
+/* interativos */
+.viz{background:#fff;border:1px solid var(--linha);position:relative;border-radius:6px;overflow:hidden}
+.preto .viz{border-color:#222}
+.ctrl{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:22px}
+.ctrl input[type=range]{width:250px;accent-color:var(--indigo)}
+.ctrl label{display:flex;gap:10px;align-items:center}
+.btn{font-family:var(--sans);font-size:19px;font-weight:600;padding:9px 20px;border:0;border-radius:999px;background:var(--lavanda);color:#000;cursor:pointer}
+.btn.esc{background:#000;color:#fff}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--ouro);outline-offset:2px}
+.num-grande{font-weight:800;font-size:66px;line-height:1}
+.leitura{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px}
+.leitura div{border-top:1px solid var(--linha);padding-top:10px}
+.leitura span{display:block;font-size:19px;color:var(--cinza)}
+.modos{display:flex;gap:10px;flex-wrap:wrap}
+.modos label{display:flex;align-items:center;gap:8px;font-size:18px;border:1px solid var(--linha);border-radius:999px;padding:5px 14px;cursor:pointer;background:#fff}
+.modos i{width:26px;height:6px;border-radius:3px;display:inline-block}
+#mapa-buffer{width:100%;height:600px}
+.leaflet-container{font-family:var(--sans)}
+.ph{border:2px dashed var(--cinza3);display:flex;align-items:center;justify-content:center;text-align:center;color:var(--cinza);font-size:22px;padding:24px;min-height:220px}
+
+
+.codigo{background:#282A36;color:#F8F8F2;border-radius:8px;padding:26px 30px;font-family:Consolas,"SFMono-Regular",monospace;font-size:22px;line-height:1.55;white-space:pre;overflow:hidden}
+.codigo .c{color:#7A7F99}.codigo .s{color:#E9C46A}.codigo .k{color:#C9B3FF}.codigo .n{color:#8BE9FD}
+.saida{background:#F5F5F5;border-left:4px solid var(--lavanda);padding:20px 24px;font-family:Consolas,monospace;font-size:21px;line-height:1.55;white-space:pre}
+.qr svg{width:100%;height:auto;display:block}
+.compacta td,.compacta th{padding-top:8px;padding-bottom:8px;font-size:24px}
+.grande .pilula{font-size:32px;padding:44px 26px;font-weight:600}
+.grande .n{font-size:80px}
+.link{font-family:Consolas,monospace;font-size:20px;word-break:break-all}
+.notas{display:none}
+.mostrar-notas .slide.ativo .notas{display:block;position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.92);color:#eee;font-size:22px;line-height:1.45;padding:20px 90px 80px;z-index:10}
+.ajuda{position:fixed;right:14px;top:10px;color:#777;font:13px var(--sans);z-index:20;transition:opacity 1s}
+.ajuda.some{opacity:0}
+@media (prefers-reduced-motion:no-preference){.slide.ativo{animation:entra .3s ease-out}@keyframes entra{from{opacity:0}to{opacity:1}}}
+
+@page{size:1600px 900px;margin:0}
+@media print{
+  html,body{overflow:visible;background:#fff;height:auto}
+  .palco{position:static;transform:none;width:1600px;height:auto}
+  .slide{display:flex!important;position:relative;width:1600px;height:900px;break-after:page;page-break-after:always;animation:none!important}
+  .ajuda,.notas,.ctrl .btn{display:none!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="palco" id="palco">
+
+<!--__PDF_INICIO__-->
+
+<section class="slide">
+  <h2>Antes de começar</h2>
+  <div class="grade2" style="grid-template-columns:1.35fr .65fr;gap:60px">
+    <div class="passos" style="grid-template-columns:1fr;gap:30px">
+      <div style="display:grid;grid-template-columns:70px 300px 1fr;gap:22px;align-items:center"><div class="n" style="font-weight:800;font-size:54px">1</div><div class="pilula">Conta Google</div><div class="leg" style="font-size:22px;color:var(--cinza)">para usar o Google Colab e abrir a pasta do Drive</div></div>
+      <div style="display:grid;grid-template-columns:70px 300px 1fr;gap:22px;align-items:center"><div class="n" style="font-weight:800;font-size:54px">2</div><div class="pilula">Conta no GitHub</div><div class="leg" style="font-size:22px;color:var(--cinza)">gratuita, em github.com/signup: é onde o código fica guardado</div></div>
+      <div style="display:grid;grid-template-columns:70px 300px 1fr;gap:22px;align-items:center"><div class="n" style="font-weight:800;font-size:54px">3</div><div class="pilula ouro">Pasta da oficina</div><div class="leg" style="font-size:22px;color:var(--cinza)">espelho do GitHub no Drive: apresentação, live coding e exercícios para acompanhar</div></div>
+      <p class="link" style="margin-top:6px">__LINK_DRIVE__</p>
+      <p class="link sub">__LINK_GITHUB__</p>
+    </div>
+    <div class="qr" style="align-self:center">__QR_DRIVE__<p class="peq" style="text-align:center;margin-top:10px">aponte a câmera do celular</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Vamos nos apresentar</h2>
+  <div class="passos grande" style="grid-template-columns:repeat(4,1fr);margin-top:50px">
+    <div class="passo"><div class="n">1</div><div class="pilula">Nome</div></div>
+    <div class="passo"><div class="n">2</div><div class="pilula">Período do curso</div></div>
+    <div class="passo"><div class="n">3</div><div class="pilula ouro">O que você mais gosta no curso</div></div>
+    <div class="passo"><div class="n">4</div><div class="pilula ouro">O que espera aprender hoje</div></div>
+  </div>
+  <div class="mais"></div>
+  <p class="sub" style="font-size:30px">Um minuto por pessoa.</p>
+</section>
+
+<section class="slide preto divisor">
+  <ol>
+    <li>1. Ciência da complexidade para cidades</li>
+    <li>2. Planejamento urbano</li>
+    <li>3. Mobilidade urbana</li>
+    <li>4. Método quantitativo</li>
+    <li>5. Dados geoespaciais</li>
+    <li>6. Redes: o sistema da RMBH</li>
+    <li>7. Python básico</li>
+    <li>8. Mão na massa</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2 style="margin-bottom:28px">Quatro horas, do conceito ao mapa</h2>
+  <table class="compacta">
+    <tr><th style="width:20%">Horário</th><th>Bloco</th><th style="width:26%">Onde</th></tr>
+    <tr><td>0:00 – 0:10</td><td>Avisos e apresentações</td><td>todos</td></tr>
+    <tr><td>0:10 – 0:40</td><td>1 a 3. Complexidade, planejamento e mobilidade</td><td>slides</td></tr>
+    <tr><td>0:40 – 0:55</td><td>4. Método quantitativo</td><td>slides interativos</td></tr>
+    <tr><td>0:55 – 1:20</td><td>5 e 6. Dados geoespaciais e redes</td><td>slides interativos</td></tr>
+    <tr><td>1:20 – 1:35</td><td>7. Python básico</td><td>slides</td></tr>
+    <tr><td>1:35 – 1:45</td><td>Intervalo</td><td></td></tr>
+    <tr><td>1:45 – 3:00</td><td>8. Live coding</td><td>Google Colab</td></tr>
+    <tr><td>3:00 – 3:30</td><td>8. Exercícios</td><td>Google Colab</td></tr>
+    <tr><td>3:30 – 4:00</td><td>Dúvidas</td><td>todos</td></tr>
+  </table>
+</section>
+
+<!--__PDF_MEIO__-->
+
+<!-- ======================= 4. MÉTODO ======================= -->
+<section class="slide preto divisor"><p class="titulo-sec">4. Método quantitativo</p></section>
+
+<section class="slide preto">
+  <p class="afirma">Um mapa bonito não é uma conclusão.</p>
+  <aside class="notas">Todo mapa coroplético mostra diferenças. A pergunta é se a diferença responde a alguma coisa.</aside>
+</section>
+
+<section class="slide">
+  <h2>O caminho de uma análise</h2>
+  <div class="passos" style="grid-template-columns:repeat(6,1fr)">
+    <div class="passo"><div class="n">1</div><div class="pilula">Pergunta</div><div class="leg">um problema urbano, num recorte e num tempo</div></div>
+    <div class="passo"><div class="n">2</div><div class="pilula">Hipótese</div><div class="leg">uma resposta que o dado pode contrariar</div></div>
+    <div class="passo"><div class="n">3</div><div class="pilula">Dado</div><div class="leg">fonte, escala, ano e o que ele não mede</div></div>
+    <div class="passo"><div class="n">4</div><div class="pilula ouro">Validação</div><div class="leg">vazios, duplicados, tipos, extremos</div></div>
+    <div class="passo"><div class="n">5</div><div class="pilula ouro">Método</div><div class="leg">um espacial e um quantitativo</div></div>
+    <div class="passo"><div class="n">6</div><div class="pilula ouro">Leitura</div><div class="leg">resultado, sentido urbano e limite</div></div>
+  </div>
+  <div class="mais"></div>
+  <p class="sub">Os exercícios do final percorrem estas etapas numa versão curta.</p>
+</section>
+
+<section class="slide">
+  <h2>Como escrever uma hipótese</h2>
+  <div class="grade2">
+    <div>
+      <div class="pilula branca" style="border:2px solid var(--cinza3);width:auto;display:inline-block;margin-bottom:24px">Vaga</div>
+      <p style="font-size:32px">"A periferia de BH é mal servida."</p>
+      <p class="sub">Mal servida de quê? Comparada com o quê? Que número mostraria o contrário?</p>
+    </div>
+    <div>
+      <div class="pilula" style="width:auto;display:inline-block;margin-bottom:24px">Testável</div>
+      <p><b>H1:</b> setores censitários em favelas e comunidades urbanas estão mais distantes da unidade de saúde mais próxima do que os demais setores de BH.</p>
+      <p><b>H0:</b> não há diferença.</p>
+      <p class="peq">Dependente: distância (m). Independente: estar ou não em favela. Controle: densidade.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Validação: desconfie antes de analisar</h2>
+  <table>
+    <tr><th style="width:26%">Pergunta</th><th>Como checar</th><th style="width:34%">Na oficina</th></tr>
+    <tr><td>Está completo?</td><td><code>df.isna().sum()</code></td><td>setores sem moradores</td></tr>
+    <tr><td>Há repetição?</td><td><code>df["cod"].duplicated().sum()</code></td><td>códigos de município</td></tr>
+    <tr><td>O tipo está certo?</td><td><code>df.dtypes</code></td><td>população chega como texto</td></tr>
+    <tr><td>Os extremos fazem sentido?</td><td><code>df.describe()</code></td><td>densidades absurdas</td></tr>
+    <tr><td>Cobre o território?</td><td>comparar com outra fonte</td><td>lacunas do OpenStreetMap</td></tr>
+    <tr><td>Bate com a referência?</td><td>validação cruzada</td><td>soma dos setores = total da SIDRA</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Correlação: força e direção de uma relação</h2>
+  <div class="grade2" style="grid-template-columns:1.1fr .9fr">
+    <div class="viz"><svg id="corr-svg" viewBox="0 0 640 480" style="width:100%;height:100%" role="img" aria-label="Gráfico de dispersão interativo"></svg></div>
+    <div>
+      <div class="ctrl"><label>Correlação real <input type="range" id="corr-r" min="-1" max="1" step="0.05" value="0.6"></label></div>
+      <div class="ctrl"><button class="btn esc" id="corr-out">Adicionar um valor extremo</button></div>
+      <div class="leitura" style="margin-top:28px">
+        <div><span>Pearson (linear)</span><b class="num-grande" id="corr-p">–</b></div>
+        <div><span>Spearman (por ranking)</span><b class="num-grande" id="corr-s">–</b></div>
+      </div>
+      <p class="peq" style="margin-top:24px">Vai de −1 a 1. Perto de 0, não há relação monotônica. Um único extremo derruba o Pearson; o Spearman resiste melhor.</p>
+    </div>
+  </div>
+  <aside class="notas">Arrastar até zero e mostrar que a nuvem perde a forma. Depois, com 0,6, adicionar o extremo e comparar os dois coeficientes.</aside>
+</section>
+
+<section class="slide">
+  <h2>Correlação não é causalidade</h2>
+  <div class="grade2">
+    <div>
+      <p style="font-size:36px;font-weight:700;max-width:20ch">Bairros com mais ciclovias têm mais ciclistas.</p>
+      <p class="sub">A ciclovia atraiu os ciclistas, ou os ciclistas que já estavam lá pressionaram pela ciclovia?</p>
+    </div>
+    <div>
+      <h3>Antes de afirmar causa, pergunte</h3>
+      <ul>
+        <li>Existe uma terceira variável? (renda, relevo, distância ao centro)</li>
+        <li>A ordem no tempo está clara?</li>
+        <li>O efeito aparece em outros lugares?</li>
+        <li>Existe um mecanismo plausível?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Regressão: quanto Y muda quando X muda</h2>
+  <div class="grade2">
+    <div>
+      <p style="font-weight:700;font-size:38px;margin-bottom:30px;max-width:22ch">log(densidade) = a + b · log(distância) + erro</p>
+      <table>
+        <tr><td style="width:28%"><b>b</b></td><td>1% mais longe de BH → b% na densidade</td></tr>
+        <tr><td><b>p-valor</b></td><td>a relação dificilmente é acaso; não diz se é grande</td></tr>
+        <tr><td><b>R²</b></td><td>quanto da variação o modelo explica</td></tr>
+        <tr><td><b>resíduo</b></td><td>observado − previsto: vale mapear</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Por que o logaritmo?</h3>
+      <p>Densidade é muito assimétrica: poucos municípios muito densos e centenas pouco densos. No log, a relação se aproxima de uma reta.</p>
+      <h3 style="margin-top:26px">Por que mapear o resíduo?</h3>
+      <p>Se os erros formam manchas, falta uma variável espacial no modelo: é a autocorrelação espacial.</p>
+      <p class="peq">É a mesma lógica do gradiente de Von Thünen, agora testada com dados.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 5. GEOESPACIAL ======================= -->
+<section class="slide preto divisor"><p class="titulo-sec">5. Dados geoespaciais</p></section>
+
+<section class="slide">
+  <h2>Um dado espacial é uma tabela que sabe onde está</h2>
+  <table>
+    <tr><th>CD_SETOR</th><th>NM_BAIRRO</th><th>pessoas</th><th>em_favela</th><th style="color:var(--indigo)">geometry</th></tr>
+    <tr><td>310620005…</td><td>Centro</td><td>[n]</td><td>False</td><td style="color:var(--indigo)">POLYGON ((…))</td></tr>
+    <tr><td>310620005…</td><td>Lagoinha</td><td>[n]</td><td>False</td><td style="color:var(--indigo)">POLYGON ((…))</td></tr>
+    <tr><td>310620005…</td><td>[bairro]</td><td>[n]</td><td>True</td><td style="color:var(--indigo)">POLYGON ((…))</td></tr>
+  </table>
+  <div class="passos" style="grid-template-columns:repeat(3,1fr);margin-top:56px">
+    <div class="passo"><div class="pilula preta">Ponto</div><div class="leg">estação, escola, anúncio de aluguel</div></div>
+    <div class="passo"><div class="pilula preta">Linha</div><div class="leg">rua, trecho de metrô, curso d'água</div></div>
+    <div class="passo"><div class="pilula preta">Polígono</div><div class="leg">lote, setor censitário, parque</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Tipos de coluna existem para evitar erros</h2>
+  <table>
+    <tr><th style="width:18%">Tipo</th><th style="width:26%">Guarda</th><th>Armadilha urbana</th></tr>
+    <tr><td><code>object</code></td><td>texto</td><td>código IBGE e CEP são texto: zero à esquerda importa e ninguém soma código</td></tr>
+    <tr><td><code>int64</code></td><td>inteiro</td><td>contagens: pessoas, domicílios</td></tr>
+    <tr><td><code>float64</code></td><td>decimal</td><td>o geobr guarda o código como 3106200.0 e o join falha</td></tr>
+    <tr><td><code>bool</code></td><td>verdadeiro/falso</td><td>"está em favela?" vira grupo de comparação</td></tr>
+    <tr><td><code>geometry</code></td><td>forma e posição</td><td>sem CRS, a forma não tem escala</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Projeção: antes de medir, saiba a escala</h2>
+  <div class="grade2" style="grid-template-columns:1.25fr .75fr">
+    <table>
+      <tr><th>CRS</th><th>Unidade</th><th>Uso</th></tr>
+      <tr><td>EPSG:4674 · SIRGAS 2000</td><td>graus</td><td>dados oficiais do IBGE e do BNDES</td></tr>
+      <tr><td>EPSG:4326 · WGS84</td><td>graus</td><td>OpenStreetMap, GPS, web</td></tr>
+      <tr><td><b>EPSG:31983 · UTM 23S</b></td><td><b>metros</b></td><td><b>medir na RMBH</b></td></tr>
+      <tr><td>Albers (área igual)</td><td>metros</td><td>áreas no estado inteiro</td></tr>
+    </table>
+    <div>
+      <p style="font-size:30px">A Terra é curva; a prancha é plana. Toda projeção distorce área, forma, distância ou direção.</p>
+      <p class="sub">Graus localizam. Metros medem. Um buffer de 800 em graus não significa nada.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Dois tipos de join</h2>
+  <div class="grade2">
+    <div>
+      <div class="pilula" style="width:auto;display:inline-block;margin-bottom:22px">Por atributo · <code style="background:transparent">merge</code></div>
+      <p>Junta pela coluna em comum, como o código do município.</p>
+      <p class="peq">Tabela da SIDRA (sem geometria) + malha do geobr = mapa de população.</p>
+      <svg viewBox="0 0 600 170" style="width:100%;margin-top:14px" aria-label="Duas tabelas ligadas por um código">
+        <rect x="10" y="20" width="220" height="130" fill="#fff" stroke="#000" stroke-width="2"/><rect x="370" y="20" width="220" height="130" fill="#fff" stroke="#000" stroke-width="2"/>
+        <rect x="10" y="20" width="70" height="130" fill="#B8A0E8"/><rect x="370" y="20" width="70" height="130" fill="#B8A0E8"/>
+        <path d="M240 85 H360" stroke="#38307E" stroke-width="5"/><path d="M345 72 L362 85 L345 98" fill="none" stroke="#38307E" stroke-width="5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="pilula ouro" style="width:auto;display:inline-block;margin-bottom:22px">Espacial · <code style="background:transparent">sjoin</code></div>
+      <p>Junta pela relação geométrica: dentro, intersecta, mais próximo.</p>
+      <p class="peq">Estação + setores que caem no buffer = população atendida.</p>
+      <svg viewBox="0 0 600 170" style="width:100%;margin-top:14px" aria-label="Pontos dentro de um polígono">
+        <polygon points="160,20 440,30 470,150 130,145" fill="#EFEAF9" stroke="#38307E" stroke-width="3"/>
+        <g fill="#CFAE6E"><circle cx="230" cy="80" r="11"/><circle cx="330" cy="110" r="11"/><circle cx="390" cy="60" r="11"/></g>
+        <g fill="#C4C4C4"><circle cx="70" cy="90" r="11"/><circle cx="530" cy="70" r="11"/></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Buffer: quem mora perto da estação?</h2>
+  <div class="grade2" style="grid-template-columns:1.4fr .6fr;gap:48px">
+    <div class="viz"><div id="mapa-buffer" aria-label="Mapa das estações da Linha 1 com raios de influência"></div></div>
+    <div>
+      <div class="ctrl"><label>Raio <input type="range" id="buf-r" min="200" max="1500" step="100" value="800"></label></div>
+      <p class="num-grande" id="buf-m" style="margin-top:24px">800 m</p>
+      <p class="sub" id="buf-min">≈ 10 min a pé</p>
+      <p class="peq" style="margin-top:26px">800 m é a referência usual do planejamento orientado ao transporte. Círculos vizinhos se sobrepõem: a mesma pessoa conta duas vezes.</p>
+      <p class="peq">Linha 1: posição aproximada das estações. Projetos: BNDES.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Cluster: onde os pontos se concentram?</h2>
+  <div class="grade2" style="grid-template-columns:1.1fr .9fr">
+    <div class="viz"><svg id="db-svg" viewBox="0 0 640 480" style="width:100%;height:100%" role="img" aria-label="Agrupamento DBSCAN interativo"></svg></div>
+    <div>
+      <p>O <b>DBSCAN</b> forma grupos onde há muitos vizinhos próximos. Pontos isolados viram ruído.</p>
+      <div class="ctrl"><label>Raio (eps) <input type="range" id="db-eps" min="40" max="300" step="10" value="120"></label><b id="db-eps-v">120 m</b></div>
+      <div class="ctrl"><label>Mínimo de vizinhos <input type="range" id="db-min" min="3" max="20" step="1" value="8"></label><b id="db-min-v">8</b></div>
+      <div class="leitura" style="margin-top:22px">
+        <div><span>grupos</span><b class="num-grande" id="db-k">–</b></div>
+        <div><span>pontos de ruído</span><b class="num-grande" id="db-n">–</b></div>
+      </div>
+      <p class="peq" style="margin-top:18px">Pontos simulados para a demonstração. No live coding: bares, cafés e restaurantes de BH no OpenStreetMap.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Mapas em série: um loop, muitos mapas</h2>
+  <div class="grade2" style="grid-template-columns:1.05fr .95fr;gap:50px">
+    <div>
+<div class="codigo"><span class="k">for</span> nome <span class="k">in</span> bairros:
+    recorte = bh[bh[<span class="s">"NM_BAIRRO"</span>] == nome]
+    fig, ax = mapa_base()
+    recorte.plot(ax=ax, column=<span class="s">"dens_ha"</span>,
+                 vmin=<span class="n">0</span>, vmax=vmax)
+    titulo(ax, nome)
+    creditos(fig, fonte=<span class="s">"IBGE, Censo 2022"</span>)
+    salvar(fig, nome)</div>
+      <p class="sub" style="margin-top:22px">Mesma escala de cores em todos: assim os bairros podem ser comparados. Nove bairros ou quatrocentos custam o mesmo esforço.</p>
+    </div>
+    <div class="viz" style="border:0"><svg id="loop-svg" viewBox="0 0 600 600" style="width:100%;height:100%" role="img" aria-label="Prancha ilustrativa com nove pequenos mapas"></svg></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Dados públicos que usaremos</h2>
+  <table>
+    <tr><th style="width:34%">Fonte</th><th>O que traz</th><th style="width:20%">Como chega</th></tr>
+    <tr><td>IBGE · SIDRA</td><td>população 2022 por município, sem geometria</td><td>API</td></tr>
+    <tr><td>IBGE · Malha de setores</td><td>pessoas e domicílios por setor; Favelas e Comunidades Urbanas</td><td>GeoPackage</td></tr>
+    <tr><td>IPEA · geobr</td><td>limites oficiais prontos para o Python</td><td>pacote</td></tr>
+    <tr><td>OpenStreetMap</td><td>edificações, uso do solo, verde, equipamentos, ruas</td><td><code>osmnx</code></td></tr>
+    <tr><td>BNDES · Mobilidade Brasil</td><td>17 projetos de metrô, VLT e BRT da RMBH, com demanda estimada</td><td>GeoPackage</td></tr>
+  </table>
+</section>
+
+<!-- ======================= 6. REDES ======================= -->
+<section class="slide preto divisor"><p class="titulo-sec">6. Redes: o sistema da RMBH</p></section>
+
+<section class="slide">
+  <h2>OpenStreetMap: o tecido da cidade em código</h2>
+  <div class="circulos" style="justify-content:center;margin-top:10px">
+    <div class="circ" style="background:var(--cinza3)">Cheios e vazios</div>
+    <div class="circ" style="background:var(--rosa)">Uso do solo</div>
+    <div class="circ" style="background:var(--aco)">Áreas verdes</div>
+    <div class="circ" style="background:var(--lavanda)">Rota de A até B</div>
+  </div>
+  <div class="mais"></div>
+  <p class="sub">Edificações em preto e espaço aberto em branco, como no mapa de Roma de Nolli (1748). O OSM é colaborativo: área vazia pode ser falta de registro, não de uso.</p>
+</section>
+
+<section class="slide">
+  <h2>Vocabulário de grafos</h2>
+  <div class="grade2" style="grid-template-columns:.9fr 1.1fr">
+    <svg viewBox="0 0 560 480" style="width:100%" aria-label="Rede de exemplo com um nó central destacado">
+      <g stroke="#C4C4C4" stroke-width="5">
+        <line x1="80" y1="100" x2="230" y2="210"/><line x1="80" y1="340" x2="230" y2="210"/>
+        <line x1="380" y1="210" x2="500" y2="90"/><line x1="380" y1="210" x2="500" y2="350"/><line x1="500" y1="90" x2="500" y2="350"/>
+      </g>
+      <line x1="230" y1="210" x2="380" y2="210" stroke="#CFAE6E" stroke-width="10"/>
+      <g fill="#38307E" stroke="#fff" stroke-width="4"><circle cx="80" cy="100" r="18"/><circle cx="80" cy="340" r="18"/><circle cx="500" cy="90" r="18"/><circle cx="500" cy="350" r="18"/><circle cx="380" cy="210" r="24"/></g>
+      <circle cx="230" cy="210" r="32" fill="#000" stroke="#fff" stroke-width="4"/>
+    </svg>
+    <table>
+      <tr><td style="width:34%"><b>Nó</b></td><td>estação, terminal, conexão</td></tr>
+      <tr><td><b>Aresta</b></td><td>trecho entre dois nós</td></tr>
+      <tr><td><b>Grau</b></td><td>quantas arestas chegam ao nó</td></tr>
+      <tr><td><b>Caminho mínimo</b></td><td>o trajeto mais curto entre dois nós</td></tr>
+      <tr><td><b>Diâmetro</b></td><td>o maior dos caminhos mínimos</td></tr>
+      <tr><td><b>Betweenness</b></td><td>quantos caminhos mínimos passam pelo nó (em preto)</td></tr>
+      <tr><td><b>Ponte</b></td><td>aresta que, retirada, parte a rede (em dourado)</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide caso">
+  <div class="esq"><h2>Caso de Estudo</h2></div>
+  <div class="dir">
+    <p class="espaco" style="font-size:20px;color:var(--cinza)">BNDES · Mobilidade Brasil · RMBH</p>
+    <p style="font-weight:800;font-size:46px;line-height:1.1;margin:10px 0 18px;max-width:20ch">17 projetos de metrô, VLT e BRT, mais a Linha 1 em operação</p>
+    <div class="viz" style="height:470px;border:0"><svg id="rede-estatica" viewBox="0 0 900 640" style="width:100%;height:100%" role="img" aria-label="Mapa do sistema de transporte da RMBH"></svg></div>
+    <div class="modos" id="legenda-estatica" style="margin-top:12px"></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2 style="margin-bottom:24px">O sistema como rede</h2>
+  <div class="grade2" style="grid-template-columns:1.2fr .8fr;gap:44px">
+    <div class="viz"><svg id="rede-svg" viewBox="0 0 900 640" style="width:100%;height:100%" role="img" aria-label="Rede interativa; clique num nó para retirá-lo"></svg></div>
+    <div>
+      <div class="modos" id="rede-modos"></div>
+      <div class="leitura" style="margin-top:14px">
+        <div><span>pedaços da rede</span><b class="num-grande" id="rede-c">–</b></div>
+        <div><span>pares de nós ainda ligados</span><b class="num-grande" id="rede-v">–</b></div>
+      </div>
+      <h3 style="margin-top:18px;font-size:24px">Betweenness</h3>
+      <div id="rede-bars"></div>
+      <div class="ctrl" style="margin-top:8px"><button class="btn esc" id="rede-pior">Retirar o mais central</button><button class="btn" id="rede-reset">Restaurar</button></div>
+      <p class="peq" id="rede-estado" style="margin-top:10px;min-height:2.6em"></p>
+    </div>
+  </div>
+  <aside class="notas">Começar retirando São Gabriel. Depois desligar o BRT inteiro. Mostrar que Ibirité–Barreiro já começa isolado: lacuna do recorte de dados, não da cidade.</aside>
+</section>
+
+<section class="slide">
+  <h2>Onde a rede carrega mais gente</h2>
+  <div class="grade2">
+    <div>
+      <h3>Nós mais carregados</h3>
+      <p class="peq">Soma da demanda estimada pelo BNDES das linhas que passam pelo nó.</p>
+      <div id="carga-nos"></div>
+    </div>
+    <div>
+      <h3>Trechos mais carregados</h3>
+      <p class="peq">Quando várias linhas usam o mesmo trecho, as demandas se somam.</p>
+      <div id="carga-trechos"></div>
+    </div>
+  </div>
+  <p class="peq" style="margin-top:18px">A Linha 1 em operação não tem demanda nessa base e entra com zero. Confira a unidade da demanda na fonte antes de citar números.</p>
+</section>
+
+<!-- ======================= 7. PYTHON BÁSICO ======================= -->
+<section class="slide preto divisor"><p class="titulo-sec">7. Python básico</p></section>
+
+<section class="slide">
+  <h2>Por que Python?</h2>
+  <div class="circulos" style="justify-content:center;margin-top:10px">
+    <div class="circ" style="background:var(--cinza3)">Gratuito e aberto</div>
+    <div class="circ" style="background:var(--rosa)">Reprodutível</div>
+    <div class="circ" style="background:var(--aco)">Milhares de bibliotecas</div>
+    <div class="circ" style="background:var(--lavanda)">Roda no navegador (Colab)</div>
+  </div>
+  <div class="mais"></div>
+  <p class="sub">O mesmo código que faz um mapa faz quatrocentos, e qualquer pessoa pode refazer cada passo.</p>
+</section>
+
+<section class="slide">
+  <h2>O Google Colab em um minuto</h2>
+  <table>
+    <tr><th style="width:36%">Quero…</th><th>Faço…</th></tr>
+    <tr><td>rodar uma célula</td><td><b>Shift + Enter</b></td></tr>
+    <tr><td>guardar a minha versão</td><td>Arquivo › Salvar uma cópia no Drive</td></tr>
+    <tr><td>começar do zero</td><td>Ambiente de execução › Reiniciar sessão</td></tr>
+    <tr><td>rodar um comando do sistema</td><td>começar a linha com <code>!</code>, como em <code>!pip install osmnx</code></td></tr>
+    <tr><td>entender um erro</td><td>ler a <b>última</b> linha da mensagem vermelha</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Hello World e a calculadora</h2>
+  <div class="grade2" style="gap:40px">
+<div class="codigo"><span class="k">print</span>(<span class="s">"Hello, World!"</span>)
+
+<span class="n">10</span> + <span class="n">5</span>    <span class="c"># soma</span>
+<span class="n">10</span> / <span class="n">4</span>    <span class="c"># divisão</span>
+<span class="n">10</span> // <span class="n">4</span>   <span class="c"># divisão inteira</span>
+<span class="n">10</span> % <span class="n">4</span>    <span class="c"># resto</span>
+<span class="n">2</span> ** <span class="n">10</span>   <span class="c"># potência</span>
+
+populacao = <span class="n">2315560</span>
+area_km2 = <span class="n">331.4</span>
+populacao / area_km2</div>
+<div class="saida">Hello, World!
+
+15
+2.5
+2
+2
+1024
+
+
+
+6987.2</div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Listas e dicionários</h2>
+  <div class="grade2" style="gap:40px">
+    <div>
+      <div class="pilula" style="width:auto;display:inline-block;margin-bottom:16px">Lista: uma sequência</div>
+<div class="codigo">estacoes = [<span class="s">"Eldorado"</span>, <span class="s">"Lagoinha"</span>,
+            <span class="s">"Central"</span>, <span class="s">"Vilarinho"</span>]
+estacoes[<span class="n">0</span>]     <span class="c"># "Eldorado": conta do zero</span>
+estacoes[-<span class="n">1</span>]    <span class="c"># "Vilarinho": o último</span>
+<span class="k">len</span>(estacoes)  <span class="c"># 4</span></div>
+    </div>
+    <div>
+      <div class="pilula ouro" style="width:auto;display:inline-block;margin-bottom:16px">Dicionário: uma ficha</div>
+<div class="codigo">estacao = {<span class="s">"nome"</span>: <span class="s">"Lagoinha"</span>,
+           <span class="s">"linha"</span>: <span class="n">1</span>,
+           <span class="s">"lat"</span>: -<span class="n">19.9129</span>}
+estacao[<span class="s">"nome"</span>]   <span class="c"># "Lagoinha"</span>
+estacao.keys()    <span class="c"># as chaves</span></div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:24px">Uma linha de tabela é, no fundo, um dicionário: cada coluna é uma chave.</p>
+</section>
+
+<section class="slide">
+  <h2>Loops e funções</h2>
+  <div class="grade2" style="gap:40px">
+    <div>
+      <div class="pilula" style="width:auto;display:inline-block;margin-bottom:16px">for: repetir para cada item</div>
+<div class="codigo"><span class="k">for</span> bairro, d <span class="k">in</span> densidades.items():
+    <span class="k">if</span> d > <span class="n">80</span>:
+        <span class="k">print</span>(bairro, <span class="s">"denso"</span>)
+    <span class="k">else</span>:
+        <span class="k">print</span>(bairro, <span class="s">"menos denso"</span>)</div>
+      <p class="peq" style="margin-top:12px">A indentação diz o que está dentro do loop.</p>
+    </div>
+    <div>
+      <div class="pilula ouro" style="width:auto;display:inline-block;margin-bottom:16px">def: escrever uma vez, usar sempre</div>
+<div class="codigo"><span class="k">def</span> densidade(pessoas, area_m2):
+    <span class="k">return</span> pessoas / (area_m2 / <span class="n">10_000</span>)
+
+densidade(<span class="n">1200</span>, <span class="n">40_000</span>)   <span class="c"># 300.0</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Bibliotecas e o primeiro DataFrame</h2>
+  <div class="grade2" style="grid-template-columns:.9fr 1.1fr;gap:44px">
+    <table>
+      <tr><td style="width:44%"><code>pandas</code></td><td>tabelas</td></tr>
+      <tr><td><code>geopandas</code></td><td>tabelas com geometria</td></tr>
+      <tr><td><code>matplotlib</code></td><td>gráficos e mapas</td></tr>
+      <tr><td><code>osmnx</code></td><td>OpenStreetMap</td></tr>
+      <tr><td><code>networkx</code></td><td>grafos e redes</td></tr>
+    </table>
+    <div>
+<div class="codigo"><span class="k">import</span> pandas <span class="k">as</span> pd
+
+metro = pd.read_csv(<span class="s">"dados/metro_bh_linha1.csv"</span>)
+metro.shape      <span class="c"># (19, 4): linhas, colunas</span>
+metro.columns    <span class="c"># nomes das colunas</span>
+metro.head()     <span class="c"># primeiras linhas</span>
+metro[metro[<span class="s">"lat"</span>] > -<span class="n">19.88</span>]   <span class="c"># filtro</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 8. MÃO NA MASSA ======================= -->
+<section class="slide preto divisor"><p class="titulo-sec">8. Mão na massa</p></section>
+
+<section class="slide preto">
+  <h2>Live coding</h2>
+  <div class="grade2">
+    <div>
+      <p style="font-size:32px">Abra <code style="background:#333;color:#fff">01_livecoding.ipynb</code> e rode junto, célula por célula.</p>
+      <p class="sub">Arquivo › Salvar uma cópia no Drive. Rode com Shift + Enter.</p>
+      <p class="link" style="margin-top:26px;color:#BDBDBD">__LINK_DRIVE__</p>
+    </div>
+    <div class="passos" style="grid-template-columns:1fr;gap:12px">
+      <div class="pilula">Python em 15 minutos</div>
+      <div class="pilula">População de MG, join e projeção</div>
+      <div class="pilula">Densidade × distância: correlação e regressão</div>
+      <div class="pilula ouro">Setores de BH e um mapa por bairro</div>
+      <div class="pilula ouro">Buffer, cluster e OpenStreetMap</div>
+      <div class="pilula branca">Sistema da RMBH como rede</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Exercícios: complete o que falta</h2>
+  <div class="passos" style="grid-template-columns:repeat(3,1fr)">
+    <div class="passo"><div class="n">1</div><div class="pilula">Favelas e comunidades urbanas</div><div class="leg">criar a densidade, filtrar os setores em favela e somar moradores por favela</div></div>
+    <div class="passo"><div class="n">2</div><div class="pilula ouro">Áreas verdes e densidade</div><div class="leg">calcular a área dos parques, filtrar os maiores e cruzar com a densidade</div></div>
+    <div class="passo"><div class="n">3</div><div class="pilula" style="background:var(--aco)">Cheios e vazios</div><div class="leg">escolher um lugar de BH, medir a taxa de ocupação e ver o tamanho das edificações</div></div>
+  </div>
+  <div class="mais"></div>
+  <p class="sub">Abra <code>02_exercicios.ipynb</code> e troque cada <code>??</code> pela informação que falta. Cada exercício termina com um mapa e um gráfico com os seus créditos.</p>
+</section>
+
+<section class="slide preto">
+  <p class="afirma">30 minutos para dúvidas.</p>
+  <p class="link" style="color:#BDBDBD">__LINK_GITHUB__</p>
+</section>
+
+<!--__PDF_FIM__-->
+
+</div>
+<div class="ajuda">← → navegar · F tela cheia · N notas · P imprimir/PDF</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const REDE = /*__REDE__*/null;
+(function(){
+"use strict";
+const slides=[...document.querySelectorAll(".slide")];
+const palco=document.getElementById("palco");
+let atual=0;
+slides.forEach((s,i)=>s.dataset.n=String(i+1).padStart(2,"0"));
+function ajustar(){palco.style.setProperty("--s",Math.min(window.innerWidth/1600,window.innerHeight/900));}
+window.addEventListener("resize",ajustar);ajustar();
+function ir(i){
+  atual=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle("ativo",k===atual));
+  history.replaceState(null,"","#"+(atual+1));
+  if(slides[atual].querySelector("#mapa-buffer"))iniciarMapa();
+}
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();ir(atual+1);}
+  else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();ir(atual-1);}
+  else if(e.key==="Home")ir(0);else if(e.key==="End")ir(slides.length-1);
+  else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  else if(e.key==="n"||e.key==="N")document.body.classList.toggle("mostrar-notas");
+  else if(e.key==="p"||e.key==="P")window.print();
+});
+let tx=null;
+document.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener("touchend",e=>{if(tx===null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)ir(atual+(d<0?1:-1));tx=null;});
+
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function normal(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const fmt2=v=>v.toFixed(2).replace(".",",");
+function barrasHTML(itens,cor,fmt,larg){const mx=Math.max(...itens.map(i=>i.v),1e-9);
+  return itens.map(it=>`<div class="barra-l" data-i="${it.i??""}" style="display:grid;grid-template-columns:${larg||250}px 1fr 70px;gap:10px;align-items:center;font-size:19px;margin-bottom:7px;cursor:${it.i!=null?"pointer":"default"};opacity:${it.fora?.35:1}"><span>${it.nome}</span><span style="height:12px;background:#F0F0F0"><span style="display:block;height:12px;width:${100*it.v/mx}%;background:${cor}"></span></span><span style="text-align:right;color:#6B6B6B">${fmt(it.v)}</span></div>`).join("");}
+
+// ---------- correlação ----------
+(function(){
+  const r=rng(7),N=70,bx=[],be=[];for(let i=0;i<N;i++){bx.push(normal(r));be.push(normal(r));}
+  const svg=document.getElementById("corr-svg"),inp=document.getElementById("corr-r"),btn=document.getElementById("corr-out");let ext=false;
+  function pearson(x,y){const n=x.length,mx=x.reduce((a,b)=>a+b)/n,my=y.reduce((a,b)=>a+b)/n;let sxy=0,sx=0,sy=0;for(let i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my);sx+=(x[i]-mx)**2;sy+=(y[i]-my)**2;}return sxy/Math.sqrt(sx*sy);}
+  function rank(a){const o=a.map((v,i)=>[v,i]).sort((p,q)=>p[0]-q[0]);const rk=new Array(a.length);o.forEach((p,k)=>rk[p[1]]=k);return rk;}
+  function desenhar(){
+    const rho=+inp.value,x=bx.slice(),y=bx.map((v,i)=>rho*v+Math.sqrt(Math.max(0,1-rho*rho))*be[i]);
+    if(ext){x.push(3.6);y.push(-3.6*Math.sign(rho||1));}
+    const sx=v=>60+(v+4)/8*560,sy=v=>440-(v+4)/8*400;
+    let h=`<line x1="60" y1="440" x2="620" y2="440" stroke="#9A9A9A"/><line x1="60" y1="40" x2="60" y2="440" stroke="#9A9A9A"/>`;
+    h+=`<text x="620" y="468" text-anchor="end" font-size="18" fill="#6B6B6B" font-family="Open Sans">X: distância</text><text x="70" y="34" font-size="18" fill="#6B6B6B" font-family="Open Sans">Y: densidade</text>`;
+    x.forEach((v,i)=>{const e=ext&&i===x.length-1;h+=`<circle cx="${sx(v)}" cy="${sy(y[i])}" r="${e?11:7}" fill="${e?'#CFAE6E':'#38307E'}" fill-opacity="${e?1:.6}"/>`;});
+    svg.innerHTML=h;
+    document.getElementById("corr-p").textContent=fmt2(pearson(x,y));
+    document.getElementById("corr-s").textContent=fmt2(pearson(rank(x),rank(y)));
+    btn.textContent=ext?"Retirar o valor extremo":"Adicionar um valor extremo";
+  }
+  inp.addEventListener("input",desenhar);btn.addEventListener("click",()=>{ext=!ext;desenhar();});desenhar();
+})();
+
+// ---------- DBSCAN ----------
+(function(){
+  const r=rng(21),P=[];[[170,150,28,40],[420,300,40,55],[480,120,22,30]].forEach(([cx,cy,sd,n])=>{for(let i=0;i<n;i++)P.push([cx+normal(r)*sd,cy+normal(r)*sd]);});
+  for(let i=0;i<45;i++)P.push([40+r()*560,40+r()*400]);
+  const M=2.5,cores=["#38307E","#CFAE6E","#B47C73","#B8A0E8","#621A15","#AFC0D0","#000"];
+  const svg=document.getElementById("db-svg"),ie=document.getElementById("db-eps"),im=document.getElementById("db-min");
+  function dbscan(eps,minPts){const n=P.length,lab=new Array(n).fill(undefined);let c=-1;
+    const viz=i=>{const o=[];for(let j=0;j<n;j++){const dx=P[i][0]-P[j][0],dy=P[i][1]-P[j][1];if(dx*dx+dy*dy<=eps*eps)o.push(j);}return o;};
+    for(let i=0;i<n;i++){if(lab[i]!==undefined)continue;const nb=viz(i);if(nb.length<minPts){lab[i]=-1;continue;}c++;lab[i]=c;const fila=nb.filter(j=>j!==i);
+      while(fila.length){const j=fila.shift();if(lab[j]===-1)lab[j]=c;if(lab[j]!==undefined)continue;lab[j]=c;const nb2=viz(j);if(nb2.length>=minPts)fila.push(...nb2);}}
+    return {lab,k:c+1};}
+  function desenhar(){const e=+ie.value,m=+im.value;document.getElementById("db-eps-v").textContent=e+" m";document.getElementById("db-min-v").textContent=m;
+    const {lab,k}=dbscan(e/M,m);let h="";P.forEach((p,i)=>{const l=lab[i];h+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${l<0?4:6}" fill="${l<0?'#D5D5D5':cores[l%cores.length]}"/>`;});
+    h+=`<line x1="40" y1="455" x2="${40+200/M}" y2="455" stroke="#000" stroke-width="4"/><text x="${40+100/M}" y="447" text-anchor="middle" font-size="16" font-family="Open Sans">200 m</text>`;
+    svg.innerHTML=h;document.getElementById("db-k").textContent=k;document.getElementById("db-n").textContent=lab.filter(l=>l<0).length;}
+  ie.addEventListener("input",desenhar);im.addEventListener("input",desenhar);desenhar();
+})();
+
+
+// ---------- prancha ilustrativa do loop de mapas ----------
+(function(){const svg=document.getElementById("loop-svg");if(!svg)return;const r=rng(5),cor=["#F3EFF8","#D8CCF1","#B8A0E8","#7A63C2","#38307E"];let h="";
+  for(let k=0;k<9;k++){const x0=(k%3)*200+14,y0=Math.floor(k/3)*200+14;
+    for(let i=0;i<5;i++)for(let j=0;j<5;j++){if(r()<.18)continue;h+=`<rect x="${x0+i*34}" y="${y0+j*34}" width="31" height="31" fill="${cor[Math.floor(r()*5)]}"/>`;}
+    h+=`<text x="${x0}" y="${y0+188}" font-size="14" font-family="Open Sans" fill="#6B6B6B">bairro ${k+1}</text>`;}
+  svg.innerHTML=h;})();
+
+// ---------- dados da rede ----------
+const CORES=(REDE&&REDE.cores)||{};
+const L1=[["Eldorado",-19.9396,-44.0309],["Cidade Industrial",-19.9437,-44.0116],["Vila Oeste",-19.9378,-43.9985],["Gameleira",-19.9301,-43.9840],["Calafate",-19.9230,-43.9695],["Carlos Prates",-19.9149,-43.9535],["Lagoinha",-19.9129,-43.9425],["Central",-19.9166,-43.9343],["Santa Efigênia",-19.9196,-43.9247],["Santa Tereza",-19.9150,-43.9150],["Horto",-19.9035,-43.9131],["Santa Inês",-19.8907,-43.9165],["José Cândido da Silveira",-19.8826,-43.9212],["Minas Shopping",-19.8746,-43.9265],["São Gabriel",-19.8606,-43.9277],["Primeiro de Maio",-19.8509,-43.9314],["Waldomiro Lobo",-19.8432,-43.9361],["Floramar",-19.8352,-43.9405],["Vilarinho",-19.8216,-43.9470]];
+
+// ---------- mapa com buffer ----------
+let mapa=null,circulos=[];
+function iniciarMapa(){
+  if(mapa){mapa.invalidateSize();return;}
+  if(typeof L==="undefined"){document.getElementById("mapa-buffer").innerHTML='<div class="ph" style="height:100%">Sem internet: o mapa precisa carregar o Leaflet.</div>';return;}
+  mapa=L.map("mapa-buffer",{zoomControl:true,scrollWheelZoom:false});
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,attribution:"&copy; OpenStreetMap &copy; CARTO | BNDES | Elaboração: Felipe Almeida"}).addTo(mapa);
+  if(REDE)REDE.arestas.forEach(e=>{if(e.modo!=="Linha 1 (operação)")L.polyline(e.coords,{color:CORES[e.modo],weight:3,opacity:.55}).addTo(mapa);});
+  L.polyline(L1.map(e=>[e[1],e[2]]),{color:"#000",weight:5}).addTo(mapa);
+  L1.forEach(e=>{circulos.push(L.circle([e[1],e[2]],{radius:800,color:"#38307E",weight:1.5,fillColor:"#B8A0E8",fillOpacity:.25}).addTo(mapa));
+    L.circleMarker([e[1],e[2]],{radius:5,color:"#fff",weight:2,fillColor:"#000",fillOpacity:1}).bindTooltip(e[0]).addTo(mapa);});
+  mapa.fitBounds(L1.map(e=>[e[1],e[2]]),{padding:[20,20]});
+}
+document.getElementById("buf-r").addEventListener("input",ev=>{const m=+ev.target.value;
+  document.getElementById("buf-m").textContent=m.toLocaleString("pt-BR")+" m";document.getElementById("buf-min").textContent="≈ "+Math.round(m/80)+" min a pé";circulos.forEach(c=>c.setRadius(m));});
+window.addEventListener("beforeprint",()=>{slides.forEach(s=>s.classList.add("ativo"));iniciarMapa();if(mapa)mapa.invalidateSize();});
+window.addEventListener("afterprint",()=>ir(atual));
+
+// ---------- rede da RMBH ----------
+(function(){
+  if(!REDE)return;
+  const N=REDE.nos,E=REDE.arestas,idx=Object.fromEntries(N.map((n,i)=>[n.id,i]));
+  const todas=E.flatMap(e=>e.coords);const lats=todas.map(c=>c[0]),lons=todas.map(c=>c[1]);
+  const la0=Math.min(...lats),la1=Math.max(...lats),lo0=Math.min(...lons),lo1=Math.max(...lons),k=Math.cos(-19.9*Math.PI/180);
+  const W=900,H=640,pad=26,esc=Math.min((W-2*pad)/((lo1-lo0)*k),(H-2*pad)/(la1-la0));
+  const ox=(W-(lo1-lo0)*k*esc)/2,oy=(H-(la1-la0)*esc)/2;
+  const X=lo=>ox+(lo-lo0)*k*esc,Y=la=>H-oy-(la-la0)*esc;
+  const path=c=>"M"+c.map(p=>X(p[1]).toFixed(1)+" "+Y(p[0]).toFixed(1)).join("L");
+  const modos=[...new Set(E.map(e=>e.modo))];
+  const legenda=modos.map(m=>`<label><i style="background:${CORES[m]}"></i>${m}</label>`).join("");
+
+  // estático (caso de estudo)
+  (function(){const svg=document.getElementById("rede-estatica");let h="";
+    E.forEach(e=>{h+=`<path d="${path(e.coords)}" fill="none" stroke="${CORES[e.modo]}" stroke-width="${e.modo.startsWith("Linha 1")?5:3.5}" stroke-linecap="round" stroke-linejoin="round"/>`;});
+    N.forEach(n=>{h+=`<circle cx="${X(n.lon)}" cy="${Y(n.lat)}" r="4" fill="#fff" stroke="#000" stroke-width="1.5"/>`;});
+    svg.innerHTML=h;document.getElementById("legenda-estatica").innerHTML=legenda;})();
+
+  // interativo
+  const foraNo=new Set(),foraModo=new Set();
+  function adj(){const a=N.map(()=>[]);E.forEach(e=>{const u=idx[e.de],v=idx[e.para];if(foraNo.has(u)||foraNo.has(v)||foraModo.has(e.modo))return;a[u].push([v,e.len]);a[v].push([u,e.len]);});return a;}
+  function betweenness(a){const n=N.length,C=new Array(n).fill(0);
+    for(let s=0;s<n;s++){if(foraNo.has(s))continue;const S=[],P=N.map(()=>[]),sig=new Array(n).fill(0),d=new Array(n).fill(Infinity),done=new Array(n).fill(false);sig[s]=1;d[s]=0;
+      for(;;){let u=-1,b=Infinity;for(let i=0;i<n;i++)if(!done[i]&&d[i]<b){b=d[i];u=i;}if(u<0)break;done[u]=true;S.push(u);
+        a[u].forEach(([w,l])=>{const nd=d[u]+l;if(nd<d[w]-1e-6){d[w]=nd;sig[w]=sig[u];P[w]=[u];}else if(Math.abs(nd-d[w])<=1e-6){sig[w]+=sig[u];P[w].push(u);}});}
+      const del=new Array(n).fill(0);while(S.length){const w=S.pop();P[w].forEach(u=>del[u]+=sig[u]/sig[w]*(1+del[w]));if(w!==s)C[w]+=del[w];}}
+    const m=n-foraNo.size,norm=m>2?(m-1)*(m-2):1;return C.map(c=>c/norm);}
+  function componentes(a){const vis=new Set(),cs=[];N.forEach((_,i)=>{if(foraNo.has(i)||vis.has(i))return;const st=[i],c=[];vis.add(i);while(st.length){const u=st.pop();c.push(u);a[u].forEach(([w])=>{if(!vis.has(w)){vis.add(w);st.push(w);}});}cs.push(c);});return cs;}
+  const svg=document.getElementById("rede-svg");
+  document.getElementById("rede-modos").innerHTML=modos.map(m=>`<label><input type="checkbox" checked data-m="${m}"><i style="background:${CORES[m]}"></i>${m}</label>`).join("");
+  document.querySelectorAll("#rede-modos input").forEach(c=>c.addEventListener("change",()=>{c.checked?foraModo.delete(c.dataset.m):foraModo.add(c.dataset.m);desenhar();}));
+  let ordem=[];
+  function desenhar(){
+    const a=adj(),bt=betweenness(a),cs=componentes(a),mx=Math.max(...bt,1e-9);
+    let h="";E.forEach(e=>{const off=foraNo.has(idx[e.de])||foraNo.has(idx[e.para])||foraModo.has(e.modo);
+      h+=`<path d="${path(e.coords)}" fill="none" stroke="${CORES[e.modo]}" stroke-width="${off?1.5:(e.modo.startsWith("Linha 1")?5:3.5)}" stroke-opacity="${off?.18:1}" stroke-linecap="round" stroke-linejoin="round"/>`;});
+    N.forEach((n,i)=>{const off=foraNo.has(i),r=off?4:4+11*bt[i]/mx;
+      h+=`<g class="no" data-i="${i}" style="cursor:pointer" tabindex="0" role="button" aria-label="${n.id}"><circle cx="${X(n.lon)}" cy="${Y(n.lat)}" r="${r}" fill="${off?'#D5D5D5':'#000'}" stroke="#fff" stroke-width="2"/><title>${n.id} · ${n.linhas}</title></g>`;});
+    ordem=bt.map((v,i)=>({i,nome:N[i].id,v})).filter(x=>!foraNo.has(x.i)).sort((p,q)=>q.v-p.v);
+    ordem.slice(0,3).forEach((o,j)=>{const n=N[o.i];h+=`<text x="${X(n.lon)+14}" y="${Y(n.lat)-10+j*4}" font-size="15" font-weight="700" font-family="Open Sans" paint-order="stroke" stroke="#fff" stroke-width="4">${n.id}</text>`;});
+    svg.innerHTML=h;
+    svg.querySelectorAll(".no").forEach(g=>{const f=()=>alternar(+g.dataset.i);g.addEventListener("click",f);g.addEventListener("keydown",e=>{if(e.key==="Enter")f();});});
+    const ativos=N.length-foraNo.size,pares=cs.reduce((s,c)=>s+c.length*(c.length-1),0),tot=ativos*(ativos-1)||1;
+    document.getElementById("rede-c").textContent=cs.length;document.getElementById("rede-v").textContent=Math.round(100*pares/tot)+"%";
+    document.getElementById("rede-bars").innerHTML=barrasHTML(ordem.slice(0,5),"#38307E",fmt2,230);
+    document.querySelectorAll("#rede-bars .barra-l").forEach(b=>b.addEventListener("click",()=>alternar(+b.dataset.i)));
+    const afet=new Set();foraNo.forEach(i=>N[i].linhas.split(", ").forEach(l=>afet.add(l)));
+    document.getElementById("rede-estado").textContent=foraNo.size?`Linhas afetadas: ${[...afet].join(", ")}.`:(foraModo.size?`Sem ${[...foraModo].join(", ")}.`:"Rede completa. Ibirité–Barreiro já começa isolado.");
+  }
+  function alternar(i){foraNo.has(i)?foraNo.delete(i):foraNo.add(i);desenhar();}
+  document.getElementById("rede-pior").addEventListener("click",()=>{if(ordem.length)alternar(ordem[0].i);});
+  document.getElementById("rede-reset").addEventListener("click",()=>{foraNo.clear();foraModo.clear();document.querySelectorAll("#rede-modos input").forEach(c=>c.checked=true);desenhar();});
+  desenhar();
+
+  // cargas
+  const mil=v=>Math.round(v/1000).toLocaleString("pt-BR")+" mil";
+  document.getElementById("carga-nos").innerHTML=barrasHTML(N.map(n=>({nome:n.id,v:n.carga||0})).sort((p,q)=>q.v-p.v).slice(0,7),"#CFAE6E",mil,270);
+  document.getElementById("carga-trechos").innerHTML=barrasHTML(E.map(e=>({nome:e.de+" – "+e.para,v:e.demanda||0})).sort((p,q)=>q.v-p.v).slice(0,7),"#B47C73",mil,330);
+})();
+
+const h0=parseInt(location.hash.slice(1),10);ir(isNaN(h0)?0:h0-1);
+setTimeout(()=>document.querySelector(".ajuda").classList.add("some"),6000);
+})();
+</script>
+</body>
+</html>
