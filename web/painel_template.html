@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistema de transporte da RMBH como rede · Felipe Almeida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{--preto:#000;--branco:#fff;--cinza:#6B6B6B;--linha:#E2E2E2;--indigo:#38307E;--lavanda:#B8A0E8;--fundo:#F5F5F5}
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--branco);color:var(--preto);font-family:Figtree,Arial,sans-serif;font-size:15px;line-height:1.45}
+  .app{display:grid;grid-template-columns:minmax(0,1fr) 420px;height:100%}
+  #mapa{height:100%;min-height:320px;background:var(--fundo)}
+  aside{border-left:1px solid var(--linha);overflow-y:auto;padding:30px 30px 40px;display:flex;flex-direction:column;gap:26px}
+  .marca{font-family:Jost,sans-serif;font-weight:300;letter-spacing:.35em;font-size:13px;color:var(--cinza)}
+  h1{font-weight:800;font-size:30px;line-height:1.08;margin:0}
+  h2{font-weight:800;font-size:18px;margin:0 0 6px}
+  p{margin:0;color:var(--cinza)}
+  .numeros{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--preto);border-bottom:1px solid var(--linha)}
+  .numeros div{padding:12px 0}
+  .numeros b{display:block;font-size:30px;font-weight:800;line-height:1}
+  .numeros span{font-size:13px;color:var(--cinza)}
+  .modos{display:flex;flex-wrap:wrap;gap:8px}
+  .modos label{display:flex;align-items:center;gap:8px;font-size:14px;border:1px solid var(--linha);border-radius:999px;padding:5px 12px;cursor:pointer}
+  .modos i{width:22px;height:5px;border-radius:3px;display:inline-block}
+  .barras{display:flex;flex-direction:column;gap:5px}
+  .barra{display:grid;grid-template-columns:170px 1fr 56px;align-items:center;gap:8px;font-size:13px;background:none;border:0;padding:2px 0;color:inherit;font-family:inherit;text-align:left;cursor:pointer}
+  .barra:disabled{cursor:default}
+  .barra:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+  .trilho{height:10px;background:var(--fundo)}
+  .valor{display:block;height:10px;background:var(--indigo)}
+  .barra.fora{opacity:.35;text-decoration:line-through}
+  .num{text-align:right;color:var(--cinza);font-variant-numeric:tabular-nums}
+  .acoes{display:flex;gap:8px;flex-wrap:wrap}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;border:0;border-radius:999px;background:var(--lavanda);color:var(--preto);cursor:pointer}
+  button.btn.escuro{background:var(--preto);color:var(--branco)}
+  button.btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+  .estado{font-size:14px;min-height:3em;color:var(--preto)}
+  .creditos{margin-top:auto;font-size:12px;color:var(--cinza);border-top:1px solid var(--linha);padding-top:12px}
+  .leaflet-container{font-family:Figtree,sans-serif}
+  @media (max-width:860px){.app{grid-template-columns:1fr;grid-template-rows:55vh auto;height:auto}#mapa{height:55vh}aside{border-left:0;border-top:1px solid var(--linha)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="mapa" role="region" aria-label="Mapa da rede"></div>
+  <aside>
+    <div>
+      <div class="marca">FELIPE ALMEIDA</div>
+      <h1 id="titulo" style="margin-top:10px">Sistema de transporte da RMBH como rede</h1>
+      <p style="margin-top:10px">Clique numa estação ou conexão para retirá-la. Ligue e desligue os modos para ver como a rede depende de cada um.</p>
+    </div>
+    <div class="modos" id="modos"></div>
+    <div class="numeros" aria-live="polite">
+      <div><b id="n-nos">–</b><span>nós ativos</span></div>
+      <div><b id="n-comp">–</b><span>pedaços da rede</span></div>
+      <div><b id="n-viag">–</b><span>pares ainda ligados</span></div>
+    </div>
+    <div><h2>Quem segura a rede</h2><p>Betweenness: fração dos caminhos mínimos que passam pelo nó.</p><div class="barras" id="barras-bet" style="margin-top:10px"></div></div>
+    <div><h2>Nós mais carregados</h2><p>Soma da demanda estimada pelo BNDES das linhas que passam pelo nó.</p><div class="barras" id="barras-carga" style="margin-top:10px"></div></div>
+    <div>
+      <div class="acoes"><button class="btn escuro" id="btn-pior">Retirar o mais central</button><button class="btn" id="btn-reset">Restaurar</button></div>
+      <div class="estado" id="estado" aria-live="polite" style="margin-top:12px"></div>
+    </div>
+    <div class="creditos" id="creditos">Elaboração: Felipe Almeida (felipe-almeida.com)</div>
+  </aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const DADOS = /*__DADOS__*/null;
+(function(){
+  if(!DADOS){document.getElementById('estado').textContent='Sem dados. Gere este arquivo pelo notebook.';return;}
+  document.getElementById('creditos').textContent='Elaboração: Felipe Almeida (felipe-almeida.com) | Fonte: '+DADOS.fonte;
+  if(DADOS.titulo) document.getElementById('titulo').textContent=DADOS.titulo;
+  const N=DADOS.nos, E=DADOS.arestas, CORES=DADOS.cores;
+  const idx=Object.fromEntries(N.map((n,i)=>[n.id,i]));
+  const foraNo=new Set(), foraModo=new Set();
+
+  function adj(){const a=N.map(()=>[]);E.forEach(e=>{const u=idx[e.de],v=idx[e.para];if(foraNo.has(u)||foraNo.has(v)||foraModo.has(e.modo))return;a[u].push([v,e.len]);a[v].push([u,e.len]);});return a;}
+  function betweenness(a){ // Brandes com Dijkstra (pesos = comprimento)
+    const n=N.length,C=new Array(n).fill(0);
+    for(let s=0;s<n;s++){if(foraNo.has(s))continue;
+      const S=[],P=N.map(()=>[]),sig=new Array(n).fill(0),d=new Array(n).fill(Infinity),done=new Array(n).fill(false);sig[s]=1;d[s]=0;
+      for(;;){let u=-1,b=Infinity;for(let i=0;i<n;i++)if(!done[i]&&d[i]<b){b=d[i];u=i;}if(u<0)break;done[u]=true;S.push(u);
+        a[u].forEach(([w,l])=>{const nd=d[u]+l;if(nd<d[w]-1e-6){d[w]=nd;sig[w]=sig[u];P[w]=[u];}else if(Math.abs(nd-d[w])<=1e-6){sig[w]+=sig[u];P[w].push(u);}});}
+      const del=new Array(n).fill(0);while(S.length){const w=S.pop();P[w].forEach(u=>del[u]+=sig[u]/sig[w]*(1+del[w]));if(w!==s)C[w]+=del[w];}}
+    const m=n-foraNo.size,norm=m>2?(m-1)*(m-2):1;return C.map(c=>c/norm);
+  }
+  function componentes(a){const vis=new Set(),cs=[];N.forEach((_,i)=>{if(foraNo.has(i)||vis.has(i))return;const st=[i],c=[];vis.add(i);while(st.length){const u=st.pop();c.push(u);a[u].forEach(([w])=>{if(!vis.has(w)){vis.add(w);st.push(w);}});}cs.push(c);});return cs;}
+
+  const mapa=L.map('mapa',{zoomControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO | BNDES Mobilidade Brasil'}).addTo(mapa);
+  const maxDem=Math.max(...E.map(e=>e.demanda||0),1);
+  const camE=E.map(e=>L.polyline(e.coords,{color:CORES[e.modo]||'#888',weight:3+7*(e.demanda||0)/maxDem,opacity:.9,lineCap:'round'}).bindTooltip(`${e.linhas}<br>demanda ${Math.round(e.demanda||0).toLocaleString('pt-BR')}`).addTo(mapa));
+  const camN=N.map((n,i)=>{const m=L.circleMarker([n.lat,n.lon],{radius:5,color:'#fff',weight:2,fillColor:'#000',fillOpacity:1}).addTo(mapa);
+    m.bindTooltip(`<b>${n.id}</b><br>${n.linhas}`);m.on('click',()=>alternar(i));return m;});
+  mapa.fitBounds(L.latLngBounds(N.map(n=>[n.lat,n.lon])),{padding:[24,24]});
+
+  const modos=[...new Set(E.map(e=>e.modo))];
+  document.getElementById('modos').innerHTML=modos.map(m=>`<label><input type="checkbox" checked data-m="${m}"><i style="background:${CORES[m]}"></i>${m}</label>`).join('');
+  document.querySelectorAll('#modos input').forEach(c=>c.addEventListener('change',()=>{c.checked?foraModo.delete(c.dataset.m):foraModo.add(c.dataset.m);atualizar();}));
+
+  function barras(alvo,itens,fmt,clic){const el=document.getElementById(alvo);const mx=Math.max(...itens.map(i=>i.v),1e-9);
+    el.innerHTML='';itens.forEach(it=>{const b=document.createElement('button');b.className='barra'+(it.fora?' fora':'');
+      b.innerHTML=`<span>${it.nome}</span><span class="trilho"><span class="valor" style="width:${100*it.v/mx}%"></span></span><span class="num">${fmt(it.v)}</span>`;
+      b.addEventListener('click',()=>clic(it));el.appendChild(b);});}
+  let ultimo=[];
+  function atualizar(){
+    const a=adj(),bt=betweenness(a),cs=componentes(a);
+    const ativos=N.length-foraNo.size,pares=cs.reduce((s,c)=>s+c.length*(c.length-1),0),tot=ativos*(ativos-1)||1;
+    document.getElementById('n-nos').textContent=ativos;document.getElementById('n-comp').textContent=cs.length;
+    document.getElementById('n-viag').textContent=Math.round(100*pares/tot)+'%';
+    const mx=Math.max(...bt,1e-9);
+    camN.forEach((m,i)=>m.setStyle({radius:foraNo.has(i)?4:4+10*bt[i]/mx,fillColor:foraNo.has(i)?'#bbb':'#000'}));
+    camE.forEach((c,k)=>{const e=E[k],off=foraNo.has(idx[e.de])||foraNo.has(idx[e.para])||foraModo.has(e.modo);c.setStyle({opacity:off?.08:.9});});
+    ultimo=bt.map((v,i)=>({i,nome:N[i].id,v})).filter(x=>!foraNo.has(x.i)).sort((p,q)=>q.v-p.v);
+    barras('barras-bet',ultimo.slice(0,8),v=>v.toFixed(2).replace('.',','),it=>alternar(it.i));
+    barras('barras-carga',N.map((n,i)=>({i,nome:n.id,v:n.carga||0,fora:foraNo.has(i)})).sort((p,q)=>q.v-p.v).slice(0,8),v=>(v/1000).toFixed(0)+' mil',it=>alternar(it.i));
+    const afet=new Set();foraNo.forEach(i=>N[i].linhas.split(', ').forEach(l=>afet.add(l)));
+    document.getElementById('estado').textContent=foraNo.size===0&&foraModo.size===0?'Rede completa.':
+      (foraNo.size?`Sem ${[...foraNo].map(i=>N[i].id).join(', ')}. Linhas afetadas: ${[...afet].join(', ')}.`:`Modos desligados: ${[...foraModo].join(', ')}.`);
+  }
+  function alternar(i){foraNo.has(i)?foraNo.delete(i):foraNo.add(i);atualizar();}
+  document.getElementById('btn-reset').addEventListener('click',()=>{foraNo.clear();foraModo.clear();document.querySelectorAll('#modos input').forEach(c=>c.checked=true);atualizar();});
+  document.getElementById('btn-pior').addEventListener('click',()=>{if(ultimo.length)alternar(ultimo[0].i);});
+  atualizar();
+})();
+</script>
+</body>
+</html>

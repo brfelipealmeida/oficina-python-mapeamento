@@ -1,0 +1,15 @@
+pandas>=2.0
+geopandas>=1.0
+pyogrio
+shapely>=2.0
+matplotlib>=3.9
+mapclassify
+folium
+statsmodels
+scipy
+scikit-learn
+networkx>=3.0
+osmnx>=2.0
+geobr
+jupyterlab
+pymupdf
